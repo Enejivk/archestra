@@ -305,7 +305,7 @@ function Profiles({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="h-auto p-0! font-medium hover:bg-transparent"
+          className="h-auto !p-0 font-medium hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Name
@@ -362,7 +362,7 @@ function Profiles({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="h-auto p-0! font-medium hover:bg-transparent"
+          className="h-auto !p-0 font-medium hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Created
@@ -381,7 +381,7 @@ function Profiles({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="h-auto p-0! font-medium hover:bg-transparent"
+          className="h-auto !p-0 font-medium hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Connected Tools
@@ -412,7 +412,7 @@ function Profiles({
       header: ({ column }) => (
         <Button
           variant="ghost"
-          className="h-auto p-0! font-medium hover:bg-transparent"
+          className="h-auto !p-0 font-medium hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Teams

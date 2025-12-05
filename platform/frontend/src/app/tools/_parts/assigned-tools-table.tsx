@@ -154,7 +154,7 @@ export function AssignedToolsTable({
     originFilter === "all" &&
     credentialFilter === "all" &&
     sorting[0]?.id === "createdAt" &&
-    !sorting[0]?.desc;
+    sorting[0]?.desc === true;
 
   // Fetch agent tools with server-side pagination, filtering, and sorting
   const { data: agentToolsData, isLoading } = useAllProfileTools({
