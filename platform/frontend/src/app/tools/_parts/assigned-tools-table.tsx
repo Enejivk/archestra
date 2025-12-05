@@ -67,6 +67,11 @@ type ToolResultTreatment = ProfileToolData["toolResultTreatment"];
 
 interface AssignedToolsTableProps {
   onToolClick: (tool: ProfileToolData) => void;
+  initialData?: {
+    agentTools: archestraApiTypes.GetAllAgentToolsResponses["200"];
+    profiles: archestraApiTypes.GetAllAgentsResponses["200"];
+    mcpServers: archestraApiTypes.GetMcpServersResponses["200"];
+  };
 }
 
 function SortIcon({ isSorted }: { isSorted: false | "asc" | "desc" }) {
@@ -83,15 +88,22 @@ function SortIcon({ isSorted }: { isSorted: false | "asc" | "desc" }) {
   );
 }
 
-export function AssignedToolsTable({ onToolClick }: AssignedToolsTableProps) {
+export function AssignedToolsTable({
+  onToolClick,
+  initialData,
+}: AssignedToolsTableProps) {
   const agentToolPatchMutation = useProfileToolPatchMutation();
   const bulkUpdateMutation = useBulkUpdateProfileTools();
   const unassignToolMutation = useUnassignTool();
   const { data: invocationPolicies } = useToolInvocationPolicies();
   const { data: resultPolicies } = useToolResultPolicies();
   const { data: internalMcpCatalogItems } = useInternalMcpCatalog();
-  const { data: agents } = useProfiles();
-  const { data: mcpServers } = useMcpServers();
+  const { data: agents } = useProfiles({
+    initialData: initialData?.profiles,
+  });
+  const { data: mcpServers } = useMcpServers({
+    initialData: initialData?.mcpServers,
+  });
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -132,6 +144,18 @@ export function AssignedToolsTable({ onToolClick }: AssignedToolsTableProps) {
   >(new Set());
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
 
+  // Check if current params match the initial data params
+  const isInitialDataValid =
+    initialData &&
+    pageIndex === 0 &&
+    pageSize === 50 &&
+    !searchQuery &&
+    agentFilter === "all" &&
+    originFilter === "all" &&
+    credentialFilter === "all" &&
+    sorting[0]?.id === "createdAt" &&
+    !sorting[0]?.desc;
+
   // Fetch agent tools with server-side pagination, filtering, and sorting
   const { data: agentToolsData, isLoading } = useAllProfileTools({
     pagination: {
@@ -149,6 +173,7 @@ export function AssignedToolsTable({ onToolClick }: AssignedToolsTableProps) {
       mcpServerOwnerId:
         credentialFilter !== "all" ? credentialFilter : undefined,
     },
+    initialData: isInitialDataValid ? initialData.agentTools : undefined,
   });
 
   const agentTools = agentToolsData?.data ?? [];
