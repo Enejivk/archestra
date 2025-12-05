@@ -1,5 +1,9 @@
 import { archestraApiSdk, type archestraApiTypes } from "@shared";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 
 const {
   assignToolToAgent,
@@ -37,7 +41,7 @@ export function useAllProfileTools({
     mcpServerOwnerId?: string;
   };
 }) {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: [
       "agent-tools",
       {
