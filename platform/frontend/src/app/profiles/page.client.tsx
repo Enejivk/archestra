@@ -1,6 +1,5 @@
 "use client";
-
-import { archestraApiSdk, E2eTestId } from "@shared";
+import { archestraApiSdk, type archestraApiTypes, E2eTestId } from "@shared";
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import {
@@ -13,16 +12,14 @@ import {
   X,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { ErrorBoundary } from "@/app/_parts/error-boundary";
 import {
   type ProfileLabel,
   ProfileLabels,
   type ProfileLabelsRef,
 } from "@/components/agent-labels";
 import { DebouncedInput } from "@/components/debounced-input";
-import { LoadingSpinner } from "@/components/loading";
 import { McpConnectionInstructions } from "@/components/mcp-connection-instructions";
 import { PageLayout } from "@/components/page-layout";
 import { ProxyConnectionInstructions } from "@/components/proxy-connection-instructions";
@@ -66,14 +63,17 @@ import { ProfileActions } from "./agent-actions";
 import { AssignToolsDialog } from "./assign-tools-dialog";
 // Removed ChatConfigDialog - chat configuration is now managed in /chat via Prompt Library
 
-export default function ProfilesPage() {
+export default function ProfilesPage({
+  initialData,
+}: {
+  initialData?: {
+    profiles: archestraApiTypes.GetAgentsResponses["200"];
+    teams: archestraApiTypes.GetTeamsResponses["200"];
+  };
+}) {
   return (
     <div className="w-full h-full">
-      <ErrorBoundary>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Profiles />
-        </Suspense>
-      </ErrorBoundary>
+      <Profiles initialData={initialData} />
     </div>
   );
 }
@@ -153,7 +153,14 @@ function ProfileTeamsBadges({
   );
 }
 
-function Profiles() {
+function Profiles({
+  initialData,
+}: {
+  initialData?: {
+    profiles: archestraApiTypes.GetAgentsResponses["200"];
+    teams: archestraApiTypes.GetTeamsResponses["200"];
+  };
+}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -181,12 +188,22 @@ function Profiles() {
   const sortBy = sortByFromUrl || "createdAt";
   const sortDirection = sortDirectionFromUrl || "desc";
 
+  // Check if current params match the initial data params
+  const isInitialDataValid =
+    initialData &&
+    pageIndex === 0 &&
+    pageSize === 20 &&
+    sortBy === "createdAt" &&
+    sortDirection === "desc" &&
+    !nameFilter;
+
   const { data: agentsResponse } = useProfilesPaginated({
     limit: pageSize,
     offset,
     sortBy,
     sortDirection,
     name: nameFilter || undefined,
+    initialData: isInitialDataValid ? initialData.profiles : undefined,
   });
 
   const agents = agentsResponse?.data || [];
@@ -198,6 +215,7 @@ function Profiles() {
       const { data } = await archestraApiSdk.getTeams();
       return data || [];
     },
+    initialData: initialData?.teams,
   });
 
   const [searchQuery, setSearchQuery] = useState(nameFilter);
